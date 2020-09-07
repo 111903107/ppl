@@ -1,0 +1,862 @@
+Questions and Answers
+----------------------
+
+        1   How  do the  declarations  look in  the  GIMPLE? Specifically,  what
+            happens to multiple  variables declared and initialized  on the same
+            line? What happens to global declaration [int Z]?
+
+	Ans.       There is nothing like variable having global scope Every line 
+	    on dislay have their local variable declaration scope. Initializers 
+            assigned to simple declaration at the start(top) and further process 
+            proceed in the body of code.
+
+        2   How are complex  expressions such as [c  = a * b +  25] broken down?
+            Can you  determine a  rule as  to when  temporary variables  will be
+            introduced?
+
+	Ans.	    In computer science, a tree is a widely used abstract data type
+            that simulates a hierarchical tree structure, with a root value and 
+            subtrees of children with a parent node, represented as a set of linked 
+            nodes. GIMPLE is supported to have at most one operation at a time. 
+            Expression more than one operation solved with the help of precedence 
+            order and temporary value storage. GIMPLE ststements are considered as 
+            "TREE" abstract data type, where each internal node(not leaf node) 
+            represents either local or temporary variable.
+
+        3   How are  floats/doubles represented in  GIMPLE? What happens  when a
+            float/double is assigned to an integer in [Z = r]?
+
+	Ans.        In terms of number of precision it can be stated as double has
+            64 bit precision for floating point number, double has 15 decimal digits
+            of precision. Float?doubles both are denoted GIMPLE in Scientific way. 
+            Any Implicit assignments to integers are responsible for explicit casts 
+            in GIMLE.
+
+        4   How  are reads/writes  to the  global variable  Z performed?  Why is
+            there a temporary introduced  for the statement [Z = Z  + 1] but not
+            for the statements [q = Z] or [Z = p]?
+
+	Ans.        Reading/writing  from/to global  variables  requires  a memory  load
+            or  store operation.  As  GIMPLE  statements can  have  at most  one
+            operation, the only type of  statements involving globals are of the
+            form "GLOBAL  = LOCAL" or  "LOCAL =  GLOBAL". This is  because while
+            local variables  of a  procedure can  reside entirely  in registers,
+            every read/write  to global variables  must refer to main  memory as
+            they can be accessed by  other entities (threads, I/O devices, etc).
+            Hence,  any operation  on global  variables (such  as the  increment
+            shown  in this  example)  has  to go  through  an  indirection of  a
+            temporary version of the global  inside registers (as this temporary
+            value is  not visible to  I/O devices, etc). Global  temporaries are
+            named similar to the global variable but with a numeric suffix.
+
+
+
+
+
+Assign1/Solution-A-2.txt 
+Questions and Answers
+----------------------
+
+        1   How have if-blocks  been translated into GIMPLE  statements? Can you
+            differentiate between conditional and unconditional gotos?
+	Ans.	   If-else blocks are also called as conditional statements.
+            These blocks are simplified into various sections of code with
+            labels as the temporary variable having local scope. Control  transfer
+            occurs with unconditional jumps like "goto X" or conditional jump "if 
+	    Z then goto X else goto Y".
+
+        2   Repeat  the  above compilation,  but  now  asking for  another  dump
+            that  of  the pass  "cfg".  View  this  pass  and say  whether  this
+            representation makes it easier to  read and understand GIMPLEs. Draw
+            the control-flow graph  of the program A-2.c on a  piece of paper by
+            looking at the CFG dump.
+	Ans.    
+
+                f ()
+                {
+                  int c;
+                  int b;
+                  int a;
+                  int Z.0;
+                  int D.1715;
+
+                <bb 2>:
+                  a = Z;
+                  if (a <= 9)
+                    goto <bb 3>;
+                  else
+                    goto <bb 4>;
+
+                <bb 3>:
+                  b = 5;
+                  c = 17;
+                  goto <bb 6>;
+
+                <bb 4>:
+                  b = 6;
+                  c = 20;
+                  if (a == 0)
+                    goto <bb 5>;
+                  else
+                    goto <bb 6>;
+
+                <bb 5>:
+                  c = 0;
+
+                <bb 6>:
+                  D.1715 = b * 10;
+                  Z.0 = D.1715 + c;
+                  Z = Z.0;
+                  return;
+
+                }
+
+		The control-flow  graph dump shows  distinct basic blocks  which are
+            named sequentially starting from  1. Basic blocks roughly correspond
+            to  labels that  are created  during the  gimplification of  control
+            statements.
+
+
+Assign1/Solution-A-3.txt 
+
+Questions
+---------
+
+        1   Identify the basic blocks that correspond  to the while loop. How is
+            the GIMPLE for a while loop different from simple if-else jumps?
+
+	Ans.	   The syntax of a while loop in C programming language is - 
+	    while(condition) { statement(s); } Here, statement(s) may be a single 
+	    statement or a block of statements. The condition may be any expression, 
+	    and true is any nonzero value. The loop iterates while the condition is true.
+	    So, if we observed carefully, the while loop itself executed as if-else 
+	    conditional statements such as in above if sun<100(sum<=99) then sum=sum*2  
+	    (Again this is done by using local variable) and control pass backword
+	    (if-statement)else control pass to further block of code."goto" keyword 
+	    in GIMPLE uses to pass the control 
+
+        2   Identify the  basic blocks  for the nested  for-loop. You  should be
+            able  to identify  intializers, conditions  and increments  for each
+            loop as  well as  the shared  inner body.  Is there  really anything
+            special about a for-loop as compared to a while-loop?
+
+	Ans. 	  For loop statement allows you to update any loop control variables.
+	    If it is true, the loop executes and the process repeats itself (body 
+            of loop, then increment step, and then again condition). After the condition
+            becomes false, the 'for' loop terminates. A for loop is same as while-loop 
+            as it also consist of if-else conditional blocks but differ in method of 
+            sepration of initializer declaration. In For loop, initializer are seprated 
+            at initial blocks only and increment part takes place at the end of single 
+            loop iteration and control again get passed to conditional statement to check 
+            certain condition.
+
+
+Assign1/Solution-A-4.txt 
+
+-----------------------
+Questions and Answers
+----------------------
+
+        1   How is array declaration and initialization handled?
+
+	Ans.	  An array is a collection of data items, all of the same type, accessed
+	    using a common name. A one-dimensional array is like a list; A two dimensional
+            array is like a table; The C language places no limits on the number of 
+            dimensions in an array, though specific implementations may. During array 
+            declaration, body of code get splitted into various block of code. Array 
+            declaration resembles with the scalar initialization. This array declaration 
+            done according to one operation per statement as we seen it through GIMPLE. .
+
+        2   Why does the statement a[i] = b[i] get broken down to two steps with
+            an intermediate temporary?
+
+	Ans. 	  "One Operation per Statement", this is the GIMPLE's policy.As, a[i]=b[i]
+	    includes reading of data of b[i] and then storing the same value at the position 
+	    of a[i] involves two operation.This break the Golden Rule of GIMPLE,So a[i]=b[i]
+	    broken down in two step.This assignment done by temporary variable having local
+	    scope.
+
+        3   Why are there CLOBBER statements at the end?
+
+	Ans. 	  "CLOBBER" tells the compiler that the assembly code might modify any memory,
+	    not just variables that are included in the output constraints. CLOBBER is the 
+	    keyword in GIMPLE used as adresse-escape variable.This notify the compiler thet 
+	    address-escpaed scope of the variable declared earlier is ended completely.
+
+
+
+Assign1/Solution-A-5.txt 
+
+-----------------------------
+A-5 Static Single Assignment
+-----------------------------
+
+        Now, we are  going to take a  look at the Static  Single Assignment form
+        that GCC uses later during optimization.  In SSA form, each variable may
+        be assigned at most once. Also,  exactly one assignment of each variable
+Questions and Answers
+----------------------
+
+        1   Do you notice that each usage of local variable as an operand uses a
+            suffix that can be tracked to it's assignment? Why do some variables
+            have a suffix `(D)'?
+	Ans.	  A variable is nothing but a name given to a storage area that 
+	    our programs can manipulate. Each variable in C has a specific type, 
+	    which determines the size and layout of the variable's memory. If we
+	    go through the GIMPLE file we noticed that the variable used 'd_3' instead 
+	    of d(which is actual variable decalred in C program), because we can used "d"
+	    for further temporary variable with local scope if needed in other blocks of 
+	    code. Due to this usage of various variables handled efficentaly and effectively.
+	    This is the reason, GIMPLE used suffix with specified number after declaration 
+	    of particular variable in main sorce code.
+
+        2   Find the point in the CFG in  which the paths of the two assignments
+            to variable `a'  and `b' merge. You will notice  that PHI statements
+            have  been  introduced.  Can  you   guess  the  syntax  of  the  PHI
+            statements?
+	Ans.	  In compiler design, static single assignment is a property of an 
+            intermediate representation (IR), which requires that each variable be assigned  
+            exactly once, and every variable be defined before it is used. Sometimes, flow of 
+            control makes it impossible to determine the most recent version of a variable. 
+            In these cases, the compiler inserts an artificial definition for that variable  
+            called PHI function or PHI node.So, PHI node is responsible for merging variable 
+            assignments from different paths and declare the final assignment for particular 
+            variable.In the GIMPLE code of above sorce code ,
+            Statement        #a_1 = PHI <a-5(3), a_7(4)> 
+            might be indicate that if block 3 is executed then used value stored at temporary 
+            variable with local scope a_5 otherwise used value at a_7 as 4th block of code 
+            is get executed. 
+
+        3   Can you think of an example in which a PHI node merges more than two
+            versions of a variable?
+
+	Ans.	  PHI node must supports merging of variable assignments more than two
+	    assignment. Because, if it not support the merging of more than two assignment 
+	    then " switch case " used in C-Programming never be discovered. If we impliment 
+	    switch case in our sorce code and make GIMPLE file of that , then we may see that
+            PHI node merging concept is there for variavle assignment. 
+
+
+  Assign1/Solution-A-6.txt 
+
+Que.       The following  is a CFG  dump of a somewhat  meaningful little program.  Can you
+        predict the output of  the program just  by looking at  the GIMPLE  dump? Well,
+        maybe or  maybe not. But your  task is to  find the corresponding C  program for
+         which gcc-4.7.2 generated this GIMPLE dump.
+
+Answer:
+
+
+-----------------------------------------
+A-6 Sorce Code in "C" for above GIMPLE
+-----------------------------------------
+#include <stdio.h>
+
+int main()
+{
+    int i, j;
+    for(i = 2; i <= 100; i++) {
+        for(j = 2; j < i; j++) {
+            if(i % j == 0)
+                break;
+        }
+        if(i == j) {
+            printf("%d \n", i);
+        }
+    }
+    return 0;            
+}
+----------------------------------------------
+Explanation:- As code involves 2 if-else conditional statements,
+	it is pretty sure that our sorce code involve of two for loop..
+	(One in nested)
+-----------------------------------------------
+Output- After Execution of above source code we will get list of prime
+	numbers upto 100 as limit of "i" allowed to be 100. 
+-----------------------------------------------
+ 26  Assign1/Solution-B-1.txt 
+
+Questions and Answers
+----------------------
+
+        1   The body  of AddTwo(x)  seems to  be inlined into  the call  of main
+            rendering the function useless (nobody else is calling it). Then why
+            is the definition of AddTwo(x) still there all the way till the last
+            pass (B-1.c.*.optimized)?
+
+	Ans.  	  A function declaration tells the compiler about a function name 
+	    and how to call the function. Function declaration is required when you
+            define a function in one source file and you call that function in another 
+	    file. Same might happen in this case, As function defination is exists
+	    the Function name AddTwo(X) might call from another file.In such case, we
+	    should declare the function at the top of the file calling the function.
+
+        2   Is there any way to get rid of it?
+
+	Ans.  	 Functions have scope as well, though their scope is generally larger 
+	    than that of most variables.Functions can have global, namespace, class or 
+	    local (within another function) scope.In the C programming language, static 
+	    is used with global variables and functions to set their scope to the containing 
+	    file. In local variables, static is used to store the variable in the statically
+	    allocated memory instead of the automatically allocated memory.So, when function 
+	    was declared with the "static" keyword it will available to Files.
+
+ 18  Assign1/Solution-B-2.txt 
+
+Questions and Answers
+----------------------
+
+        1   What will happen if "a = a + N" is replaced by "a = a + 1"?
+
+	Ans.  	 Here, Again th PHI node merging concept reappears. PHI node 
+	    responsible for merging of variable assignment with different paths.
+	    If we done the changes and rerun the GIMPLE code..we will get following 
+	    important statement as:
+             # i_1 = PHI <i_4(2), i_6(3)>                                               
+ 	     # a_2 = PHI <a_3(2), a_5(3)>  
+	    Due to this, value of variables "i" and "a" changes after each iteration.
+	    As, Loop executes 4 times four get added to initial value of varianle "a".
+	    (As, One is added to "a" after each iteration.)Finally, we get value of "a"
+	    as 10.
+
+
+ 13  Assign1/Solution-B-3.txt 
+Questions and Answers
+------------------------
+
+        1   In the file B-3.c, what values  can variable `a' take? Will the `if'
+            condition [a  < 4] ever  be true?  Inspect the file  B-3.c.*.vrp1 to
+            analyze the dump.
+
+	Ans.  	   We are initializing value of variable "a" to integer 4, at start 
+	    of for loop itself according to for loop syntax in C programming.According,
+	    to Program written, "if" block has condition as "a < 4", which never be true
+ 	    as we are assigning value of "a" to integer 4 and incrementing after every 
+            single iteration.So, always "else" part is executed.
+
+ 28  Assign1/Solution-B-4.txt 
+Questions and Answers
+----------------------
+
+        1   How many  times is the expression  (a + c) computed  in the original
+            code (as seen in the SSA pass)? What about after the FRE pass?
+	Ans.  	  If we took glance at our GIMPLE file created, it showing us two
+	    computations get calculated.Instead of this in FRE pass each line of 
+	    execution get stored by defaut, so that when result of previous computaion
+  	    needed, if get it directly rather doing computation again as like case 
+     	    mentioned above. 
+
+        2   Have  there been  any more  optimizations  after FRE?  How will  you
+            check?
+
+	Ans.  	  After execution of source code get complied, various types of
+ 	    files get generated automatically. Simillarly, B-4.c.*.optimized also
+            get generated. if it having same output as our GIMPLE file, then our 
+	    code is already optimized. No, further optimization can possible.
+
+        3   Why did  we have  to put a  "return b" in  this assignment?  What if
+            "return b" is changed to "return 0"? Will it make any difference?
+
+	Ans.        We return "b" this time, because we process on variable b.
+	    Instead, if we return "0" directly, compiler simply return "0",So there is
+            no meaning of making computation and storing result in variable "b".So, 
+	    rather computing value for variable "b", Compiler simply get end of the code.
+ 	    That is the main reason we return integer variable "b". 
+
+ 65  Assign1/problem-gb-A-1.txt 
+----------------------------------------------
+A-1 Declarations, Expressions, and Assignments
+----------------------------------------------
+
+        Compile the following program (file  A-1.c) and observe the GIMPLE dumps
+        and answer  the questions below. If  you manage to finish  all questions
+        quickly try to attempt the optional problem.
+
+        Source file : A-1.c
+        Compilation : gcc-4.7.2 -c -fdump-tree-gimple A-1.c
+        View result : vi -O A-1.c A-1.c.*.gimple
+        Clear dumps : rm -f A-1.c.* A-1.o
+
+Program
+-------
+
+	int Z;
+
+	void main()
+	{
+		int a, b, c;
+		int p = 6;
+		int q;
+		double r;
+
+		a = 10;
+		b = 20;
+		c = a * b + 25;
+		p = 6;
+		q = Z;
+		r = 34.5;
+		Z = r;
+		Z = Z + 1;
+	}
+
+
+Questions
+---------
+
+        1   How  do the  declarations  look in  the  GIMPLE? Specifically,  what
+            happens to multiple  variables declared and initialized  on the same
+            line? What happens to global declaration [int Z]?
+
+        2   How are complex  expressions such as [c  = a * b +  25] broken down?
+            Can you  determine a  rule as  to when  temporary variables  will be
+            introduced?
+
+        3   How are  floats/doubles represented in  GIMPLE? What happens  when a
+            float/double is assigned to an integer in [Z = r]?
+
+        4   How  are reads/writes  to the  global variable  Z performed?  Why is
+            there a temporary introduced  for the statement [Z = Z  + 1] but not
+            for the statements [q = Z] or [Z = p]?
+
+
+Optional Problem
+----------------
+
+        Try to understand the underlying GIMPLE representation by looking at the
+        RAW dumps:
+
+        Compilation : gcc-4.7.2 -c -fdump-tree-gimple-raw A-1.c
+        View result : vi -O A-1.c A-1.c.*.gimple
+
+
+ 59  Assign1/problem-gb-A-2.txt 
+------------------------
+A-2 Conditional Jumps and Control Flow Graphs
+---------------------------------------------
+
+        Compile the following program (file A-2.c) and observe the GIMPLE dumps.
+
+        Source file : A-2.c
+        Compilation : gcc-4.7.2 -c -fdump-tree-gimple A-2.c
+        View result : vi -O A-2.c A-2.c.*.gimple
+        Clear dumps : rm -f A-2.c.* A-2.o
+
+Program
+-------
+
+        int Z;
+
+        void f()
+        {
+	        int a, b, c;
+	        a = Z;
+	        if (a < 10) {
+		        b = 5;
+		        c = 17;
+	        } else {
+		        b = 6;
+		        c = 20;
+		        if (a == 0) {
+			        c = 0;
+		        }
+	        }
+	        Z = b * 10 + c;
+        }
+
+
+Questions
+---------
+
+        1   How have if-blocks  been translated into GIMPLE  statements? Can you
+            differentiate between conditional and unconditional gotos?
+
+        2   Repeat  the  above compilation,  but  now  asking for  another  dump
+            that  of  the pass  "cfg".  View  this  pass  and say  whether  this
+            representation makes it easier to  read and understand GIMPLEs. Draw
+            the control-flow graph  of the program A-2.c on a  piece of paper by
+            looking at the CFG dump.
+
+            Compilation : gcc-4.7.2 -c -fdump-tree-cfg A-2.c
+            View result : vi -O A-2.c A-2.c.*.cfg
+
+***Note***  From here  onwards we will only  look at passes from  "cfg" onwards,
+            each of which uses a CFG-based representation using basic blocks.
+
+
+Additional Problem
+------------------
+
+        Try to figure  out how GCC handles the  ternary operator [a ? b  : c] in
+        GIMPLE.
+
+ 42  Assign1/problem-gb-A-3.txt 
+---------
+A-3 Loops
+---------
+
+        Compile the following program (file A-3.c) and observe the dumps.
+
+	Source file : A-3.c
+	Compilation : gcc-4.7.2 -c -fdump-tree-cfg A-3.c
+	View result : vi -O A-3.c A-3.c.*.cfg
+	Clear dumps : rm -f A-3.c.* A-3.o
+
+Program
+-------
+
+        int main()
+        {
+    	    int sum = 0;
+    	    int i, j;
+
+    	    while(sum < 100) {
+    		    sum = sum * 2;
+    	    }
+
+    	    for(i=0; i<25; i++) {
+    		    for(j=0; j<50; j++) {
+    			    sum = sum + i*j;
+    		    }
+    	    }
+        }
+
+Questions
+---------
+
+        1   Identify the basic blocks that correspond  to the while loop. How is
+            the GIMPLE for a while loop different from simple if-else jumps?
+
+        2   Identify the  basic blocks  for the nested  for-loop. You  should be
+            able  to identify  intializers, conditions  and increments  for each
+            loop as  well as  the shared  inner body.  Is there  really anything
+            special about a for-loop as compared to a while-loop?
+
+
+ 42  Assign1/problem-gb-A-4.txt 
+-----------------------
+A-4 Arrays and Pointers
+-----------------------
+
+        In this program we observe how GCC treats arrays and pointers.
+
+        Compile  the following  program (file  A-4.c) and  observe the  compiler
+        output to answer the questions.
+
+        Source file : A-4.c
+        Compilation : gcc-4.7.2 -c -fdump-tree-cfg A-4.c
+        View result : vi -O A-4.c A-4.c.*.cfg
+        Clear dumps : rm -f A-4.c.* A-4.o
+
+Program
+-------
+
+        int main()
+        {
+            int a[3];
+            int b[] = {1, 2, 3};
+            int i, *p;
+            for (i=0; i<3; i++) {
+                a[i] = b[i];
+            }
+            p = a;
+            *(p + 2) = 5;
+        }
+
+
+Questions
+---------
+
+        1   How is array declaration and initialization handled?
+
+        2   Why does the statement a[i] = b[i] get broken down to two steps with
+            an intermediate temporary?
+
+        3   Why are there CLOBBER statements at the end?
+
+
+
+ 57  Assign1/problem-gb-A-5.txt 
+-----------------------------
+A-5 Static Single Assignment
+-----------------------------
+
+        Now, we are  going to take a  look at the Static  Single Assignment form
+        that GCC uses later during optimization.  In SSA form, each variable may
+        be assigned at most once. Also,  exactly one assignment of each variable
+        dominates every use of the variable.
+
+        In order  to implement SSA, local  variables are suffixed with  a unique
+        number which represents the assignment.  For example, two assignments to
+        the variable `a' may look like `a_0' and `a_1'.
+
+        Compile the following program (file A-5.c) and observe the dumps.
+
+        Source file : A-5.c
+        Compilation : gcc-4.7.2 -c -fdump-tree-cfg -fdump-tree-ssa A-5.c
+        View result : vi -O A-5.c.*.cfg A-5.c.*.ssa
+        Clear dumps : rm -f A-5.c.* A-5.o
+
+Program
+-------
+
+        int main()
+        {
+            int a, b, c, d;
+
+            d = 10;
+            if (c > d) {
+                a = 3;
+                b = 2;
+            } else {
+                a = 2;
+                b = 3;
+            }
+
+            c = a + b;
+        }
+
+
+
+Questions
+---------
+
+        1   Do you notice that each usage of local variable as an operand uses a
+            suffix that can be tracked to it's assignment? Why do some variables
+            have a suffix `(D)'?
+
+        2   Find the point in the CFG in  which the paths of the two assignments
+            to variable `a'  and `b' merge. You will notice  that PHI statements
+            have  been  introduced.  Can  you   guess  the  syntax  of  the  PHI
+            statements?
+
+        3   Can you think of an example in which a PHI node merges more than two
+            versions of a variable?
+
+
+ 70  Assign1/problem-gb-A-6.txt 
+
+Good!  You are  half-way there.  Now you  know about  how C  is translated  into
+GIMPLE.  Let's see how good you are at understanding the C to GIMPLE conversion.
+
+The following  is a CFG  dump of a somewhat  meaningful little program.  Can you
+predict the  output of  the program just  by looking at  the GIMPLE  dump? Well,
+maybe or  maybe not. But your  task is to  find the corresponding C  program for
+which gcc-4.7.2 generated this GIMPLE dump.
+
+
+---------------------------------------
+A-6 GIMPLE CFG DUMP (file A-6-cfg-dump)
+---------------------------------------
+
+        main ()
+        {
+          int j;
+          int i;
+          int D.2168;
+
+        <bb 2>:
+          i = 2;
+          goto <bb 11>;
+
+        <bb 3>:
+          j = 2;
+          goto <bb 7>;
+
+        <bb 4>:
+          D.2168 = i % j;
+          if (D.2168 == 0)
+            goto <bb 5>;
+          else
+            goto <bb 6>;
+
+        <bb 5>:
+          goto <bb 8>;
+
+        <bb 6>:
+          j = j + 1;
+
+        <bb 7>:
+          if (j < i)
+            goto <bb 4>;
+          else
+            goto <bb 8>;
+
+        <bb 8>:
+          if (i == j)
+            goto <bb 9>;
+          else
+            goto <bb 10>;
+
+        <bb 9>:
+          printf ("%d \n", i);
+
+        <bb 10>:
+          i = i + 1;
+
+        <bb 11>:
+          if (i <= 100)
+            goto <bb 3>;
+          else
+            goto <bb 12>;
+
+        <bb 12>:
+          return;
+
+        }
+
+ 41  Assign1/problem-gb-B-1.txt 
+---------------------
+B-1 Function Inlining
+---------------------
+
+        In this program we  observe how the code of a function  is placed in the
+        position of  its call if  doing so does not  increase the code  size too
+        much.
+
+        Source file : B-1.c
+        Compilation : gcc-4.7.2 -c -O2 -fdump-tree-all B-1.c
+        View result : vi -O B-1.c.*.ssa B-1.c.*.einline 
+        Clear dumps : rm -f B-1.c.* B-1.o
+
+        Note: On some older versions of gcc the pass may be named "einline2".
+
+Program
+-------
+
+        int AddTwo(int a)
+        {
+            a = a + 2;
+            return a;
+        }
+
+        int main()
+        {
+            int x = 3;
+            x = AddTwo(x);
+            return x;
+        }
+
+Questions
+---------
+
+        1   The body  of AddTwo(x)  seems to  be inlined into  the call  of main
+            rendering the function useless (nobody else is calling it). Then why
+            is the definition of AddTwo(x) still there all the way till the last
+            pass (B-1.c.*.optimized)?
+
+        2   Is there any way to get rid of it?
+
+ 34  Assign1/problem-gb-B-2.txt
+------------------
+B-2 Loop Unrolling
+------------------
+
+        In this  program we observe how  loops can be unrolled  by repeating the
+        loop body  if the compile time  estimate of the loop  count is available
+        and unrolling does not become too large.
+
+        Source file : B-2.c
+        Compilation : gcc-4.7.2 -c -O2 -fdump-tree-all B-2.c
+        View result : vi -O B-2.c.*.ssa B-2.c.*.cunroll
+        Clear dumps : rm -f B-2.c.* B-2.o
+
+Program
+-------
+
+        int N;
+
+        int main()
+        {
+            int i, a = 10;
+            for(i= 0; i < 4; i++)
+            {
+        	a = a + N;
+            };
+            return a;
+        }
+
+Questions
+---------
+
+        1   What will happen if "a = a + N" is replaced by "a = a + 1"?
+
+
+ 37  Assign1/problem-gb-B-3.txt 
+---------------------------
+B-3 Value Range Propagation
+---------------------------
+
+        In  Value Range  Propagation,  for each  variable, a  range  (a pair  of
+        max-bound and min-bound) is maintained. Those conditional branches whose
+        conditionals lie outside these bounds are eliminated.
+
+        Source file : B-3.c
+        Compilation : gcc-4.7.2 -c -O2 -fdump-tree-all B-3.c
+        View result : vi -O B-3.c.*.ssa B-3.c.*.vrp1 
+        Clear dumps : rm -f B-3.c.* B-3.o
+
+
+Program
+-------
+
+        #include <stdio.h>
+        int main ()
+        {
+           int a, b;
+           for (a=4 ; a<100; a++) {
+               if (a < 4)
+        	   b = b + 2;
+               else
+        	   b = b * 2;
+           }
+           printf ("%d%d", a, b);
+        }
+
+Questions
+---------
+
+        1   In the file B-3.c, what values  can variable `a' take? Will the `if'
+            condition [a  < 4] ever  be true?  Inspect the file  B-3.c.*.vrp1 to
+            analyze the dump.
+
+ 41  Assign1/problem-gb-B-4.txt 
+------------------------------------
+B-4 Common Subexpression Elimination
+------------------------------------
+
+        Here  is  a  small  program   to  observe  the  optimization  of  Common
+        Subexpression Elimination (CSE) or Full Redundancy Elimination (FRE). In
+        the  following program  observe  that the  term "a  +  c" appears  twice
+        (albeit differently)  and thus can be  calculated once and the  value is
+        used next  time when  needed (the redundant  calculation second  time is
+        eliminated, thus the term CSE/FRE).
+
+        You must demand -O2 for CSE/FRE.
+
+        Source file : B-4.c
+        Compilation : gcc-4.7.2 -c -O2 -fdump-tree-all B-4.c
+        View result : vi -O B-4.c.*.ssa B-4.c.*.fre1
+        Clear dumps : rm -f B-4.c.* B-4.o
+
+Program
+-------
+
+        int main()
+        {
+            int a, b, c;
+            b = (a + c + b) * (c + a);
+            return b;
+        }
+
+
+Questions
+---------
+
+        1   How many  times is the expression  (a + c) computed  in the original
+            code (as seen in the SSA pass)? What about after the FRE pass?
+
+        2   Have  there been  any more  optimizations  after FRE?  How will  you
+            check?
+
+        3   Why did  we have  to put a  "return b" in  this assignment?  What if
+            "return b" is changed to "return 0"? Will it make any difference?

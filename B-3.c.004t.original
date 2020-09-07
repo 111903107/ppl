@@ -1,0 +1,178 @@
+
+;; Function __ntohl (null)
+;; enabled by -tree-original
+
+
+{
+  __asm__("bswap %0":"=r" _x:"0" _x);
+  return _x;
+}
+
+
+;; Function __ntohs (null)
+;; enabled by -tree-original
+
+
+{
+  __asm__("xchgb %b0,%h0":"=Q" _x:"0" _x);
+  return _x;
+}
+
+
+;; Function __bswap_16 (null)
+;; enabled by -tree-original
+
+
+{
+  return (short unsigned int) ((signed short) (__x >> 8) | (signed short) ((int) __x << 8));
+}
+
+
+;; Function __bswap_32 (null)
+;; enabled by -tree-original
+
+
+{
+  return (unsigned int) ((int) __bswap_16 ((int) (short unsigned int) __x) << 16 | (int) __bswap_16 ((int) (short unsigned int) (__x >> 16)));
+}
+
+
+;; Function __bswap_64 (null)
+;; enabled by -tree-original
+
+
+{
+  return (long long unsigned int) __bswap_32 ((unsigned int) __x) << 32 | (long long unsigned int) __bswap_32 ((unsigned int) (__x >> 32));
+}
+
+
+;; Function gnu_dev_major (null)
+;; enabled by -tree-original
+
+
+{
+  return (int) (dev >> 16);
+}
+
+
+;; Function gnu_dev_minor (null)
+;; enabled by -tree-original
+
+
+{
+  return (int) dev & 65535;
+}
+
+
+;; Function gnu_dev_makedev (null)
+;; enabled by -tree-original
+
+
+{
+  return (dev_t) (maj << 16 | min & 65535);
+}
+
+
+;; Function __sgetc_r (null)
+;; enabled by -tree-original
+
+
+{
+  int __c =  --__p->_r < 0 ? __srget_r (__ptr, __p) : (int) *__p->_p++ ;
+
+    int __c =  --__p->_r < 0 ? __srget_r (__ptr, __p) : (int) *__p->_p++ ;
+  if (((int) __p->_flags & 16384) != 0 && __c == 13)
+    {
+      {
+        int __c2 =  --__p->_r < 0 ? __srget_r (__ptr, __p) : (int) *__p->_p++ ;
+
+                int __c2 =  --__p->_r < 0 ? __srget_r (__ptr, __p) : (int) *__p->_p++ ;
+        if (__c2 == 10)
+          {
+            __c = __c2;
+          }
+        else
+          {
+            ungetc (__c2, __p);
+          }
+      }
+    }
+  return __c;
+}
+
+
+;; Function __sputc_r (null)
+;; enabled by -tree-original
+
+
+{
+  if (((int) _p->_flags & 16384) != 0 && _c == 10)
+    {
+      __sputc_r (_ptr, 13, _p);
+    }
+  if ( --_p->_w >= 0 || _p->_w >= _p->_lbfsize && (signed char) _c != 10)
+    {
+      return (int) (*_p->_p++  = (unsigned char) _c);
+    }
+  else
+    {
+      return __swbuf_r (_ptr, _c, _p);
+    }
+}
+
+
+;; Function _getchar_unlocked (null)
+;; enabled by -tree-original
+
+
+{
+  struct _reent * _ptr;
+
+    struct _reent * _ptr;
+  _ptr = __getreent ();
+  return __sgetc_r (_ptr, (struct FILE *) _ptr->_stdin);
+}
+
+
+;; Function _putchar_unlocked (null)
+;; enabled by -tree-original
+
+
+{
+  struct _reent * _ptr;
+
+    struct _reent * _ptr;
+  _ptr = __getreent ();
+  return __sputc_r (_ptr, _c, (struct FILE *) _ptr->_stdout);
+}
+
+
+;; Function main (null)
+;; enabled by -tree-original
+
+
+{
+  int a;
+  int b;
+
+    int a;
+    int b;
+  a = 4;
+  goto <D.3094>;
+  <D.3093>:;
+  if (a <= 3)
+    {
+      b = b + 2;
+    }
+  else
+    {
+      b = b * 2;
+    }
+  a++ ;
+  <D.3094>:;
+  if (a <= 99) goto <D.3093>; else goto <D.3095>;
+  <D.3095>:;
+  printf ((const char * restrict) "%d%d", a, b);
+}
+return 0;
+

@@ -1,0 +1,62 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[4]:
+
+
+import math as a
+import sys
+
+a=[1,0]
+
+for i in a:
+    try:
+        r=1/a[i]
+        print(r);
+        break
+    except:
+        print("Oops!", sys.exc_info()[0], "occurred.")
+        print("Next entry.")
+        print()
+    
+try :
+   import test.h
+except ImportError:
+   print("Error: No module found.")
+else :
+   print("Import successful.")
+
+
+try :
+   x = 1 / 0
+   print(x)
+except ZeroDivisionError:
+   print("Error: Division by zero.")
+else :
+   print("Successfully Divided.")
+
+
+try:
+   fd = open("testfile", "r")
+   fd.write("Opened the file in write mode.")
+except IOError:
+   print("Error: File not Found.")
+else:
+   print("Written content in the file successfully.")
+
+
+try :
+   x = '2' + 6
+   print(x)
+except TypeError:
+   print("Error: Type doesn't match.")
+else :
+   print("Addition successful.")
+
+
+
+# In[ ]:
+
+
+
+
